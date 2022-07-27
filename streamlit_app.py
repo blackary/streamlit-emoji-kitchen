@@ -11,6 +11,20 @@ st.set_page_config(page_title="Emoji Kitchen", page_icon="‍:stew:", layout="wi
 st.title(":stew: ‍Emoji Kitchen")
 
 
+# Add css to make button text larger
+st.markdown(
+    """
+<style>
+button {
+    font-size: 3.5rem;
+    border: none !important;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
 def emoji_url(code_point) -> str:
     return f"https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/128/emoji_u${code_point}.png"
 
@@ -51,29 +65,10 @@ def mixmoji_url(code_point1: str, code_point2: str) -> str:
 # Load dictionary from points.json
 points = json.loads(Path("points.json").read_text())
 
-
-N_COLS = 30
-
-columns = st.columns(30)
-
-
 if "clicked" not in st.session_state:
     st.session_state["clicked"] = []
 
-
-for idx, point in enumerate(points):
-    emoji = code_point_to_emoji(point)
-    col = columns[idx % 30]
-    with col:
-        if st.button(emoji):
-            st.session_state["clicked"].append(point)
-            if len(st.session_state["clicked"]) > 2:
-                st.session_state["clicked"].pop(0)
-
-# st.write(st.session_state["clicked"])
-
 clicked = st.session_state["clicked"]
-
 
 if not clicked:
     first = "?"
@@ -91,7 +86,7 @@ elif len(clicked) == 2:
     second = code_point_to_emoji(clicked[1])
     third = combo_url
 
-col1, col2, col3, col4, col5, _ = st.columns([1, 1, 1, 1, 1, 15])
+_, col1, col2, col3, col4, col5, _ = st.columns([7, 1, 1, 1, 1, 1, 7])
 
 col1.write(f"# {first}")
 col2.write(f"# +")
@@ -105,3 +100,21 @@ else:
         col5.image(third, use_column_width=True)
     except RequestException:
         col5.write(f"## Not found")
+
+
+N_COLS = 20
+
+columns = st.columns(N_COLS)
+
+
+for idx, point in enumerate(points):
+    emoji = code_point_to_emoji(point)
+    col = columns[idx % N_COLS]
+    with col:
+        if st.button(emoji):
+            st.session_state["clicked"].append(point)
+            if len(st.session_state["clicked"]) > 2:
+                st.session_state["clicked"].pop(0)
+            st.experimental_rerun()
+
+# st.write(st.session_state["clicked"])
