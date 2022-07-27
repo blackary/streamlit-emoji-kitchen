@@ -10,6 +10,8 @@ st.set_page_config(page_title="Emoji Kitchen", page_icon="‍:stew:", layout="wi
 
 st.title(":stew: ‍Emoji Kitchen")
 
+"See the original: https://emoji.supply/kitchen/"
+
 
 # Add css to make button text larger
 st.markdown(
