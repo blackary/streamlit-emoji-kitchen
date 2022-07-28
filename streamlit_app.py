@@ -10,16 +10,22 @@ st.set_page_config(page_title="Emoji Kitchen", page_icon="‍:stew:", layout="wi
 
 st.title(":stew: ‍Emoji Kitchen")
 
-"See the original: https://emoji.supply/kitchen/"
 
-
-# Add css to make button text larger
 st.markdown(
     """
 <style>
 button {
     font-size: 3.5rem;
     border: none !important;
+}
+
+.block-container div:first-child div:first-child {
+    display: inline-block !important;
+}
+
+.element-container {
+    display: inline-block !important;
+    width: 80px;
 }
 </style>
 """,
@@ -99,24 +105,14 @@ if third == "?":
 else:
     try:
         requests.head(third).raise_for_status()
-        col5.image(third, use_column_width=True)
+        col5.image(third, width=70)
     except RequestException:
         col5.write(f"## Not found")
 
-
-N_COLS = 20
-
-columns = st.columns(N_COLS)
-
-
 for idx, point in enumerate(points):
     emoji = code_point_to_emoji(point)
-    col = columns[idx % N_COLS]
-    with col:
-        if st.button(emoji):
-            st.session_state["clicked"].append(point)
-            if len(st.session_state["clicked"]) > 2:
-                st.session_state["clicked"].pop(0)
-            st.experimental_rerun()
-
-# st.write(st.session_state["clicked"])
+    if st.button(emoji):
+        st.session_state["clicked"].append(point)
+        if len(st.session_state["clicked"]) > 2:
+            st.session_state["clicked"].pop(0)
+        st.experimental_rerun()
