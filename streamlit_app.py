@@ -1,4 +1,5 @@
 import json
+import random
 from pathlib import Path
 
 import pandas as pd
@@ -54,8 +55,16 @@ def get_matches() -> pd.DataFrame:
 
 
 @st.cache_data
+def get_other_matches(code_point1: str) -> list[str]:
+    matches = get_matches()
+    return (
+        matches[matches["emoji1"] == code_point1]["emoji2"].tolist()
+        + matches[matches["emoji2"] == code_point1]["emoji1"].tolist()
+    )
+
+
+@st.cache_data
 def mixmoji_url(code_point1: str, code_point2: str) -> str:
-    # date = "20201001"
     matches = get_matches()
 
     try:
@@ -103,12 +112,32 @@ elif len(clicked) == 2:
 else:
     raise ValueError("Too many clicks")
 
-_, col1, col2, col3, col4, col5, _ = st.columns([4, 1, 1, 1, 1, 2, 4])
+_, clear_col, col1, col2, col3, col4, col5, random_col, _ = st.columns(
+    [4, 1, 1, 1, 1, 1, 1, 1, 4]
+)
+
+
+def clear_clicked():
+    st.session_state["clicked"] = []
+    st.query_params.update({"clicked": []})
+
+
+clear_col.button("# 🗑️", on_click=clear_clicked)
 
 col1.write(f"# {first}")
 col2.write("# +")
 col3.write(f"# {second}")
 col4.write("# =")
+
+
+def pick_random_emoji():
+    point_1 = random.choice(points)
+    point_2 = random.choice(get_other_matches(point_1))
+    st.session_state["clicked"] = [point_1, point_2]
+    st.query_params.update({"clicked": st.session_state["clicked"]})
+
+
+random_col.button("# 🎲", on_click=pick_random_emoji)
 
 
 @st.cache_data
@@ -132,19 +161,31 @@ else:
 
 
 def button_clicked(point):
-    st.session_state["clicked"].append(point)
+    st.session_state["clicked"].insert(0, point)
     if len(st.session_state["clicked"]) > 2:
-        st.session_state["clicked"].pop(0)
+        st.session_state["clicked"].pop(2)
 
     st.query_params.update({"clicked": st.session_state["clicked"]})
 
 
 def draw_emoji_grid():
-    with st.container(height=500):
+    try:
+        point_1 = st.session_state["clicked"][0]
+        other_matches = get_other_matches(point_1)
+    except IndexError:
+        point_1 = None
+        other_matches = []
+
+    with st.container(height=800):
         st.html("<span class='emoji-grid'></span>")
         for point in points:
             emoji = code_point_to_emoji(point)
-            st.button(emoji, on_click=button_clicked, args=(point,))
+            st.button(
+                emoji,
+                on_click=button_clicked,
+                args=(point,),
+                disabled=point not in other_matches and point_1 is not None,
+            )
 
 
 draw_emoji_grid()
