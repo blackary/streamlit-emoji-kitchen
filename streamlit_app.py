@@ -112,9 +112,7 @@ elif len(clicked) == 2:
 else:
     raise ValueError("Too many clicks")
 
-_, clear_col, col1, col2, col3, col4, col5, random_col, _ = st.columns(
-    [4, 1, 1, 1, 1, 1, 1, 1, 4]
-)
+_, center, _ = st.columns([2, 1, 2])
 
 
 def clear_clicked():
@@ -122,12 +120,9 @@ def clear_clicked():
     st.query_params.update({"clicked": []})
 
 
-clear_col.button("# 🗑️", on_click=clear_clicked)
+center_left, center_right, _ = center.columns(3)
 
-col1.write(f"# {first}")
-col2.write("# +")
-col3.write(f"# {second}")
-col4.write("# =")
+content = f"{first} + {second} = "
 
 
 def pick_random_emoji():
@@ -135,9 +130,6 @@ def pick_random_emoji():
     point_2 = random.choice(get_other_matches(point_1))
     st.session_state["clicked"] = [point_1, point_2]
     st.query_params.update({"clicked": st.session_state["clicked"]})
-
-
-random_col.button("# 🎲", on_click=pick_random_emoji)
 
 
 @st.cache_data
@@ -152,12 +144,17 @@ def img_exists(url):
 
 
 if third == "?":
-    col5.write(f"# {third}")
+    content += "?"
 else:
     if img_exists(third):
-        col5.image(third, width=70)
+        content += f"<a href='{third}'><img src='{third}' width=70></a>"
     else:
-        col5.write("## ❌")
+        content += "❌"
+
+center.html(f"<h1 style='display: inline;'>{content}</h1>")
+
+center_left.button("# Clear", on_click=clear_clicked)
+center_right.button("# Random", on_click=pick_random_emoji)
 
 
 def button_clicked(point):
