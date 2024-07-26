@@ -15,23 +15,32 @@ st.title(":stew: Emoji Kitchen")
 st.markdown(
     """
 <style>
-[data-testid="stVerticalBlock"]:has(.emoji-grid) button p {
-    font-size: 3.5rem;
-    border: none !important;
-}
 
-[data-testid="stVerticalBlock"]:has(.emoji-grid) {
+[data-testid="stVerticalBlock"]:has(> div.element-container > div.stHtml > span.emoji-grid) {
+    /*max-height: 50vh;*/
+    button p {
+        font-size: 3.5rem;
+    }
+
+    button {
+        border: none !important;
+    }
+
     display: inline-block !important;
+
+    .element-container {
+        display: inline-block !important;
+        width: 80px;
+    }
 }
 
-[data-testid="stVerticalBlock"]:has(.emoji-grid) .element-container {
-    display: inline-block !important;
-    width: 80px;
+[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"] > div.element-container > div.stHtml > span.emoji-grid) {
+    position: fixed;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
 }
 
-[data-testid="stVerticalBlock"]:has(.emoji-grid) .stButton {
-    width: 0 !important;
-}
 </style>
 """,
     unsafe_allow_html=True,
@@ -96,12 +105,12 @@ clicked = st.session_state["clicked"]
 if not clicked:
     first = "?"
     second = "?"
-    third = "❌"
+    third = "<img src='https://placehold.co/70x70?text=?' width=70>"
 
 elif len(clicked) == 1:
     first = code_point_to_emoji(clicked[0])
     second = "?"
-    third = "❌"
+    third = "<img src='https://placehold.co/70x70?text=?' width=70>"
 
 elif len(clicked) == 2:
     combo_url = mixmoji_url(clicked[0], clicked[1])
@@ -149,7 +158,7 @@ else:
     if img_exists(third):
         content += f"<a href='{third}'><img src='{third}' width=70></a>"
     else:
-        content += "❌"
+        content += "<img src='https://placehold.co/70x70?text=?' width=70>"
 
 center.html(f"<h1 style='display: inline;'>{content}</h1>")
 
