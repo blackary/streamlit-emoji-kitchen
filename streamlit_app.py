@@ -12,41 +12,6 @@ st.set_page_config(page_title="Emoji Kitchen", page_icon=":stew:", layout="wide"
 st.title(":stew: Emoji Kitchen")
 
 
-st.markdown(
-    """
-<style>
-
-[data-testid="stVerticalBlock"]:has(> div.element-container > div.stHtml > span.emoji-grid) {
-    /*max-height: 50vh;*/
-    button p {
-        font-size: 3.5rem;
-    }
-
-    button {
-        border: none !important;
-    }
-
-    display: inline-block !important;
-
-    .element-container {
-        display: inline-block !important;
-        width: 80px;
-    }
-}
-
-[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"] > div.element-container > div.stHtml > span.emoji-grid) {
-    position: fixed;
-    bottom: 0;
-    left: 20px;
-    right: 20px;
-}
-
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-
 @st.cache_data
 def emoji_url(code_point) -> str:
     return f"https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/128/emoji_u${code_point}.png"
@@ -105,12 +70,12 @@ clicked = st.session_state["clicked"]
 if not clicked:
     first = "?"
     second = "?"
-    third = "<img src='https://placehold.co/70x70?text=?' width=70>"
+    third = None
 
 elif len(clicked) == 1:
     first = code_point_to_emoji(clicked[0])
     second = "?"
-    third = "<img src='https://placehold.co/70x70?text=?' width=70>"
+    third = None
 
 elif len(clicked) == 2:
     combo_url = mixmoji_url(clicked[0], clicked[1])
@@ -127,11 +92,6 @@ _, center, _ = st.columns([2, 1, 2])
 def clear_clicked():
     st.session_state["clicked"] = []
     st.query_params.update({"clicked": []})
-
-
-center_left, center_right, _ = center.columns(3)
-
-content = f"{first} + {second} = "
 
 
 def pick_random_emoji():
@@ -152,18 +112,22 @@ def img_exists(url):
         return False
 
 
-if third == "?":
-    content += "?"
-else:
-    if img_exists(third):
-        content += f"<a href='{third}'><img src='{third}' width=70></a>"
-    else:
-        content += "<img src='https://placehold.co/70x70?text=?' width=70>"
-
-center.html(f"<h1 style='display: inline;'>{content}</h1>")
-
-center_left.button("# Clear", on_click=clear_clicked)
-center_right.button("# Random", on_click=pick_random_emoji)
+with st.container(horizontal_alignment="center", gap=None):
+    with st.container(direction="horizontal", width="content"):
+        st.button("🗑️ Clear", on_click=clear_clicked)
+        st.button("🎲 Random", on_click=pick_random_emoji)
+    with st.container(
+        direction="horizontal",
+        width="content",
+        border=False,
+        vertical_alignment="bottom",
+    ):
+        string = f"{first} + {second} = "
+        st.title(string, anchor=False)
+        if third is None:
+            st.title("?", anchor=False)
+        else:
+            st.image(third, width=50)
 
 
 def button_clicked(point):
@@ -182,8 +146,7 @@ def draw_emoji_grid():
         point_1 = None
         other_matches = []
 
-    with st.container(height=800):
-        st.html("<span class='emoji-grid'></span>")
+    with st.container(direction="horizontal", gap=None, border=None, key="borderless"):
         for point in points:
             emoji = code_point_to_emoji(point)
             st.button(
@@ -191,7 +154,20 @@ def draw_emoji_grid():
                 on_click=button_clicked,
                 args=(point,),
                 disabled=point not in other_matches and point_1 is not None,
+                type="tertiary",
             )
 
 
 draw_emoji_grid()
+
+st.html(
+    """
+<style>
+
+.st-key-borderless button p {
+    font-size: 2.5rem;
+}
+
+</style>
+"""
+)

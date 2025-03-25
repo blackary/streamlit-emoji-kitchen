@@ -1,0 +1,12 @@
+[project]
+name = "emoji-kitchen"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit",
+]
+
+[tool.uv.sources]
+streamlit = { url = "https://core-previews.s3-us-west-2.amazonaws.com/pr-10528/streamlit-1.43.2-py3-none-any.whl" }
